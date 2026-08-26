@@ -1,64 +1,44 @@
 import { NextResponse } from "next/server";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
+import { currentUser } from "../../../lib/auth.js";
+import { addRun, RUN_DATA_ROOT } from "../../../lib/db.js";
+import { generate, pipeline } from "../../../lib/pyengine.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const run = promisify(execFile);
-
-// python project root is the parent of the Next.js app (webapp/)
-const PYROOT = path.resolve(process.cwd(), "..");
-const WORK = path.join(PYROOT, "data", "web");
-
-async function py(args) {
-  return run("python3", args, { cwd: PYROOT, maxBuffer: 1024 * 1024 * 16 });
-}
-
 export async function POST(request) {
+  const user = currentUser();
+  if (!user) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });
+
   try {
-    await fs.mkdir(WORK, { recursive: true });
+    const dataDir = path.join(RUN_DATA_ROOT, crypto.randomUUID());
+    await fs.mkdir(dataDir, { recursive: true });
 
     let usedUpload = false;
-    // multipart upload path (three CSVs)
     const ctype = request.headers.get("content-type") || "";
     if (ctype.includes("multipart/form-data")) {
       const form = await request.formData();
       const names = { orders: "orders.csv", settlements: "settlements.csv", bank: "bank.csv" };
-      const got = [];
+      let got = 0;
       for (const [key, fname] of Object.entries(names)) {
         const f = form.get(key);
         if (f && typeof f.arrayBuffer === "function") {
-          const buf = Buffer.from(await f.arrayBuffer());
-          await fs.writeFile(path.join(WORK, fname), buf);
-          got.push(key);
+          await fs.writeFile(path.join(dataDir, fname), Buffer.from(await f.arrayBuffer()));
+          got++;
         }
       }
-      if (got.length === 3) {
-        usedUpload = true;
-        // uploaded data has no ground truth -> remove any stale one so metrics are skipped
-        await fs.rm(path.join(WORK, "ground_truth.csv"), { force: true });
-      }
+      usedUpload = got === 3;
     }
 
-    if (!usedUpload) {
-      // generate a fresh synthetic batch (varying seed for variety)
-      const seed = String((Date.now() % 90000) + 1000);
-      await py(["src/generate_data.py", "--n", "250", "--seed", seed, "--out", WORK + "/"]);
-    }
+    if (!usedUpload) await generate(dataDir, (Date.now() % 90000) + 1000);
+    const results = await pipeline(dataDir);
 
-    // run the full reconciliation pipeline
-    await py(["src/pipeline.py", "--data", WORK + "/", "--out", WORK + "/"]);
-
-    const raw = await fs.readFile(path.join(WORK, "results.json"), "utf8");
-    const data = JSON.parse(raw);
-    return NextResponse.json({ ok: true, usedUpload, ...data });
+    const run = addRun(user.id, results, dataDir);
+    return NextResponse.json({ ok: true, runId: run.id, usedUpload, ...results });
   } catch (err) {
-    return NextResponse.json(
-      { ok: false, error: String(err?.stderr || err?.message || err) },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: String(err?.stderr || err?.message || err) }, { status: 500 });
   }
 }
