@@ -1,0 +1,16 @@
+{
+  "name": "tieout-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TieOut — web dashboard for multi-source settlement reconciliation (Razorpay AI Buildathon 2026, Track 4)",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

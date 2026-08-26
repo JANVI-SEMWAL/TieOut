@@ -1,0 +1,99 @@
+:root{
+  --ground:#F1F4F6; --surface:#FFF; --surface2:#F7F9FB; --ink:#0F151B; --muted:#586471;
+  --faint:#8A95A1; --line:#E1E7ED; --line-strong:#CBD4DC; --accent:#0E7C7B; --accent-ink:#0A5A59;
+  --accent-soft:#DBEEED; --good:#1E9D57; --good-soft:#DDF0E4; --warn:#B9760A; --warn-soft:#F6E9CF;
+  --shadow:0 1px 2px rgba(15,21,27,.05),0 8px 24px rgba(15,21,27,.05);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --ground:#0A0E13; --surface:#131A21; --surface2:#0F161C; --ink:#E9EEF2; --muted:#95A1AD;
+    --faint:#68727D; --line:#222C35; --line-strong:#31404B; --accent:#33B7B0; --accent-ink:#5FCFC8;
+    --accent-soft:#123230; --good:#37C07A; --good-soft:#10321F; --warn:#E0A43A; --warn-soft:#33260D;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground); color:var(--ink); line-height:1.55;
+  font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+.wrap{max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,52px) clamp(16px,4vw,32px) 80px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent-ink)}
+h1{font-family:"Archivo",sans-serif; font-weight:800; letter-spacing:-.02em;
+  font-size:clamp(28px,5vw,46px); line-height:1.03; margin:.3em 0 .12em; text-wrap:balance}
+.sub{color:var(--muted); margin:0; max-width:60ch}
+
+/* run panel */
+.panel{margin-top:26px; background:var(--surface); border:1px solid var(--line); border-radius:16px;
+  padding:22px clamp(18px,3vw,26px); box-shadow:var(--shadow)}
+.panel h2{font-family:"Archivo",sans-serif; font-size:17px; margin:0 0 4px}
+.panel p{color:var(--muted); font-size:13.5px; margin:0 0 16px}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+button.primary{font-family:"IBM Plex Sans",sans-serif; font-size:14px; font-weight:600; color:#fff;
+  background:var(--accent); border:0; border-radius:10px; padding:11px 20px; cursor:pointer;
+  transition:filter .14s}
+button.primary:hover{filter:brightness(1.08)}
+button.primary:disabled{opacity:.55; cursor:default}
+button.ghost{font-family:"IBM Plex Sans",sans-serif; font-size:13.5px; font-weight:500; color:var(--muted);
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:10px; padding:10px 16px; cursor:pointer}
+button.ghost:hover{color:var(--ink)}
+.uploads{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px}
+@media(max-width:640px){.uploads{grid-template-columns:1fr}}
+.uploads label{font-size:12px; color:var(--muted); display:flex; flex-direction:column; gap:5px}
+.uploads input[type=file]{font-size:12px}
+.hint{color:var(--faint); font-size:12.5px}
+.err{color:#c0392b; font-size:13.5px; margin-top:10px}
+@media(prefers-color-scheme:dark){.err{color:#ff8a7a}}
+
+/* kpis */
+.kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:28px 0}
+@media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px;
+  border-top:3px solid var(--accent); box-shadow:var(--shadow)}
+.kpi.warn{border-top-color:var(--warn)} .kpi.good{border-top-color:var(--good)}
+.kpi .kv{font-family:"Archivo",sans-serif; font-weight:800; font-size:27px; line-height:1; letter-spacing:-.01em}
+.kpi .kl{font-size:13px; font-weight:600; margin-top:8px}
+.kpi .kh{font-size:12px; color:var(--faint); margin-top:2px}
+
+h2.sec{font-family:"Archivo",sans-serif; font-weight:700; font-size:20px; letter-spacing:-.01em; margin:38px 0 4px}
+.secsub{color:var(--muted); font-size:13.5px; margin:0 0 16px}
+
+.card{background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow)}
+.tblwrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-size:13.5px}
+th{text-align:left; font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); padding:12px 14px; border-bottom:1px solid var(--line)}
+td{padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:0}
+.num{text-align:right; white-space:nowrap}
+.tag{font-family:"IBM Plex Mono",monospace; font-size:11.5px; background:var(--warn-soft); color:var(--warn);
+  padding:2px 8px; border-radius:6px; white-space:nowrap}
+.act{display:block; color:var(--accent-ink); font-size:12.5px; margin-top:3px}
+
+/* q&a */
+.qa-input{display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap}
+.qa-input input{flex:1; min-width:240px; font-family:"IBM Plex Sans",sans-serif; font-size:14px;
+  padding:11px 14px; border:1px solid var(--line-strong); border-radius:10px; background:var(--surface); color:var(--ink)}
+.qa-input input:focus{outline:2px solid var(--accent); outline-offset:1px}
+.chips{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.chip{font-size:12.5px; color:var(--accent-ink); background:var(--accent-soft); border:0; border-radius:99px;
+  padding:6px 12px; cursor:pointer}
+.chip:hover{filter:brightness(.97)}
+.answer{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--accent);
+  border-radius:10px; padding:14px 16px; box-shadow:var(--shadow)}
+.answer .q{font-weight:600; font-size:14px; margin-bottom:4px}
+.answer .a{color:var(--muted); font-size:14px}
+
+.mrow{display:flex; justify-content:space-between; padding:11px 18px; border-bottom:1px dashed var(--line); font-size:14px}
+.mrow:last-child{border-bottom:0}
+.mrow b{font-size:15px}
+.badge{display:inline-block; margin-top:12px; font-family:"IBM Plex Mono",monospace; font-size:12px;
+  padding:4px 10px; border-radius:99px; background:var(--accent-soft); color:var(--accent-ink)}
+.spinner{display:inline-block; width:15px; height:15px; border:2px solid rgba(255,255,255,.4);
+  border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.foot{margin-top:36px; color:var(--faint); font-size:12.5px; text-align:center}

@@ -25,12 +25,20 @@ full **audit trail** of every decision.
 Every real loss is caught; nothing clean is false-flagged; the numbers hold on data the
 agent was never tuned on. Open **`data/report.html`** for the visual dashboard.
 
+There are **two ways to use TieOut**: the command-line engine (below), and an interactive
+**Next.js web app** in `webapp/` (see *Web app* section) where you click to reconcile,
+browse exceptions, and ask the ledger questions live.
+
+Runs on **macOS, Windows and Linux** — it's plain Python (standard library only). On
+Windows use `python` and backslash paths, e.g. `python src\pipeline.py --data data\ --out data\`.
+
 ---
 
 ## Run it (30 seconds, no dependencies, no API key)
 
 ```bash
-bash run_demo.sh
+bash run_demo.sh        # macOS / Linux
+run_demo.bat            # Windows (double-click, or run in Command Prompt)
 ```
 
 That generates the data, reconciles, grades on a held-out batch, and writes the dashboard.
@@ -137,9 +145,11 @@ tieout/
 │   ├── llm_matcher.py     bounded/gated AI: fuzzy match + exception explainer
 │   ├── qa_agent.py        grounded Settlement Q&A
 │   ├── pipeline.py        orchestrator + HTML dashboard generator
-│   └── metrics.py         honest evaluation on held-out data
+│   ├── metrics.py         honest evaluation on held-out data
+│   └── answer.py          single-question entrypoint for the web backend
 ├── tests/
 │   └── run_tests.py       9 invariant checks (precision, recall, gating, audit)
+├── webapp/                Next.js interactive dashboard (calls the Python engine)
 └── data/                  generated CSVs + report.html (gitignored)
 ```
 
@@ -150,6 +160,24 @@ tieout/
 - `data/exceptions.csv` — the honest exception list with explanations + actions
 - `data/audit.csv` — every decision, for the audit trail
 - `data/results.json` — machine-readable summary
+
+## Web app (Next.js)
+
+An interactive dashboard lives in `webapp/`. The Python engine is the backend brain —
+the Node/Next API routes shell out to it and serve the results.
+
+```
+cd webapp
+npm install
+npm run dev        # open http://localhost:3000
+```
+
+- **Generate demo data & reconcile** — runs the full pipeline on a fresh synthetic batch.
+- **Upload your own** `orders.csv`, `settlements.csv`, `bank.csv` and reconcile them.
+- **Ask the ledger** — type questions and get grounded, live answers.
+
+Architecture: React (Next.js) frontend → Node API routes (`webapp/app/api/*`) →
+Python engine (`src/`). Requires Node 18+ and Python 3.
 
 ## Limitations (kept honest)
 
