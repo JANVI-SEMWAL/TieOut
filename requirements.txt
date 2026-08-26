@@ -1,0 +1,6 @@
+# The full pipeline, tests and dashboard run on the Python standard library ALONE.
+# You need nothing installed to generate data, reconcile, grade, and open report.html.
+
+# OPTIONAL — only to swap the rule-based AI fallback for a real LLM.
+# Set ANTHROPIC_API_KEY (and optionally ANTHROPIC_MODEL) and install:
+anthropic>=0.40.0
