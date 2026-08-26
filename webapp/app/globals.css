@@ -62,6 +62,44 @@ button.ghost:hover{color:var(--ink)}
 h2.sec{font-family:"Archivo",sans-serif; font-weight:700; font-size:20px; letter-spacing:-.01em; margin:38px 0 4px}
 .secsub{color:var(--muted); font-size:13.5px; margin:0 0 16px}
 
+/* chart: horizontal bars, single hue */
+.chart{padding:18px 20px; display:flex; flex-direction:column; gap:12px}
+.bar-row{display:grid; grid-template-columns:180px 1fr auto; gap:12px; align-items:center}
+@media(max-width:640px){.bar-row{grid-template-columns:120px 1fr auto}}
+.bar-label{font-size:12px; color:var(--muted); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.bar-track{background:var(--surface2); border-radius:5px; height:20px; overflow:hidden}
+.bar-fill{height:100%; background:var(--accent); border-radius:0 5px 5px 0; min-width:3px; transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.bar-val{font-size:13px; font-weight:600; white-space:nowrap}
+
+/* controls above the table */
+.controls{display:flex; align-items:center; gap:12px; margin:0 0 12px; flex-wrap:wrap}
+.ctl{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:6px}
+.ctl select{font-family:"IBM Plex Sans",sans-serif; font-size:13px; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line-strong); border-radius:8px; padding:6px 10px}
+button.ghost.sm{padding:7px 12px; font-size:13px}
+button.ghost.xs{padding:5px 11px; font-size:12px; border-radius:8px}
+.push{margin-left:auto}
+.actions{display:flex; gap:8px}
+
+/* recovery-draft modal */
+.modal-bg{position:fixed; inset:0; background:rgba(10,14,19,.55); display:flex;
+  align-items:center; justify-content:center; padding:20px; z-index:50}
+.modal{background:var(--surface); border:1px solid var(--line); border-radius:16px;
+  width:min(620px,100%); max-height:85vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal-head{display:flex; justify-content:space-between; align-items:flex-start;
+  padding:18px 20px 12px; border-bottom:1px solid var(--line)}
+.modal-title{font-family:"Archivo",sans-serif; font-weight:700; font-size:16px}
+.modal-sub{font-size:12.5px; color:var(--accent-ink); margin-top:2px}
+.modal-head .x{background:none; border:0; color:var(--faint); font-size:16px; cursor:pointer; padding:2px 6px}
+.modal-head .x:hover{color:var(--ink)}
+.modal-body{padding:16px 20px}
+.draft-subj{font-weight:600; font-size:14px; margin-bottom:10px}
+.draft-body{font-family:"IBM Plex Sans",sans-serif; font-size:13.5px; color:var(--ink);
+  white-space:pre-wrap; margin:0; background:var(--surface2); border:1px solid var(--line);
+  border-radius:10px; padding:14px; line-height:1.55}
+.modal-foot{display:flex; gap:12px; align-items:center; padding:12px 20px 18px; border-top:1px solid var(--line)}
+.spinner.dark{border:2px solid var(--line-strong); border-top-color:var(--accent); margin-right:8px}
+
 .card{background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow)}
 .tblwrap{overflow-x:auto}
 table{width:100%; border-collapse:collapse; font-size:13.5px}

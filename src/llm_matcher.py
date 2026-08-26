@@ -18,30 +18,103 @@ ANTHROPIC_MODEL) to use a real LLM for the fuzzy adjudication and explanations.
 import json
 import os
 import re
+import urllib.request
+import urllib.error
+
+
+def _load_dotenv():
+    """Tiny .env loader (no dependency): reads KEY=VALUE from a .env in the project
+    root or cwd, without overriding vars already set in the environment."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    for path in (os.path.join(here, "..", ".env"), os.path.join(os.getcwd(), ".env")):
+        try:
+            with open(path) as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    k, v = k.strip(), v.strip().strip('"').strip("'")
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+        except FileNotFoundError:
+            continue
+
+
+_load_dotenv()
 
 CONFIDENCE_FLOOR = 0.80
-_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-haiku-20241022")
+
+
+def _provider():
+    """Pick a FREE LLM provider from whatever is configured, in order of preference.
+    Groq and Gemini both have free tiers; Ollama runs locally for free. Falls back to
+    Anthropic if that's what's set. Returns the provider name, or None (-> rule-based)."""
+    if os.environ.get("GROQ_API_KEY"):
+        return "groq"
+    if os.environ.get("GEMINI_API_KEY"):
+        return "gemini"
+    if os.environ.get("OLLAMA_MODEL"):
+        return "ollama"
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return "anthropic"
+    return None
 
 
 def llm_available():
-    return bool(os.environ.get("ANTHROPIC_API_KEY"))
+    return _provider() is not None
+
+
+def _http_json(url, payload, headers, timeout=45):
+    body = json.dumps(payload).encode()
+    req = urllib.request.Request(
+        url, data=body, headers={"Content-Type": "application/json", **headers})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode())
 
 
 def _call_llm(system, user, max_tokens=500):
-    """Return raw text from the model, or None if no key / any failure (-> fallback)."""
-    if not llm_available():
+    """Return raw model text, or None on no-provider / any failure (-> rule-based fallback).
+    Every provider is called over plain HTTP, so there is NO SDK dependency to install."""
+    prov = _provider()
+    if prov is None:
         return None
     try:
-        from anthropic import Anthropic
-        client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-        msg = client.messages.create(
-            model=_MODEL, max_tokens=max_tokens, system=system,
-            messages=[{"role": "user", "content": user}],
-        )
-        return msg.content[0].text
+        if prov == "groq":  # free tier, OpenAI-compatible, very fast
+            model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+            out = _http_json(
+                "https://api.groq.com/openai/v1/chat/completions",
+                {"model": model, "max_tokens": max_tokens, "temperature": 0.2,
+                 "messages": [{"role": "system", "content": system},
+                              {"role": "user", "content": user}]},
+                {"Authorization": "Bearer " + os.environ["GROQ_API_KEY"]})
+            return out["choices"][0]["message"]["content"]
+        if prov == "gemini":  # free tier
+            model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+            url = ("https://generativelanguage.googleapis.com/v1beta/models/"
+                   f"{model}:generateContent?key=" + os.environ["GEMINI_API_KEY"])
+            out = _http_json(url, {
+                "contents": [{"parts": [{"text": system + "\n\n" + user}]}],
+                "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.2}}, {})
+            return out["candidates"][0]["content"]["parts"][0]["text"]
+        if prov == "ollama":  # fully local, free, offline
+            host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+            out = _http_json(host + "/api/chat", {
+                "model": os.environ["OLLAMA_MODEL"], "stream": False,
+                "messages": [{"role": "system", "content": system},
+                             {"role": "user", "content": user}]}, {})
+            return out["message"]["content"]
+        if prov == "anthropic":
+            model = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-haiku-20241022")
+            out = _http_json("https://api.anthropic.com/v1/messages", {
+                "model": model, "max_tokens": max_tokens, "system": system,
+                "messages": [{"role": "user", "content": user}]},
+                {"x-api-key": os.environ["ANTHROPIC_API_KEY"], "anthropic-version": "2023-06-01"})
+            return out["content"][0]["text"]
     except Exception as e:  # never let the AI layer crash the pipeline
         print(f"  [llm] falling back (reason: {e})")
         return None
+    return None
 
 
 def _extract_json(text):

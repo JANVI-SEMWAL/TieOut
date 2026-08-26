@@ -51,8 +51,10 @@ python3 src/metrics.py        --results data/recon_output.csv --truth data/groun
 python3 tests/run_tests.py                                    # run the test suite
 ```
 
-Everything runs on the Python standard library. To swap the rule-based AI fallback for a
-real LLM, copy `.env.example` to `.env`, set `ANTHROPIC_API_KEY`, and `pip install anthropic`.
+Everything runs on the Python standard library — no installs, no API key. To switch the
+AI layer from its rule-based fallback to a real LLM, copy `.env.example` to `.env` and add
+a **free** key (Groq or Google Gemini, both free tiers; or a local Ollama model). No SDK
+needed — providers are called over plain HTTP.
 
 ---
 

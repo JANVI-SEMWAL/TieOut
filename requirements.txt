@@ -1,6 +1,5 @@
-# The full pipeline, tests and dashboard run on the Python standard library ALONE.
-# You need nothing installed to generate data, reconcile, grade, and open report.html.
-
-# OPTIONAL — only to swap the rule-based AI fallback for a real LLM.
-# Set ANTHROPIC_API_KEY (and optionally ANTHROPIC_MODEL) and install:
-anthropic>=0.40.0
+# TieOut runs entirely on the Python STANDARD LIBRARY — nothing to install.
+# The CLI, the tests, the dashboard, and the AI layer all work out of the box.
+#
+# The AI layer talks to free LLM providers (Groq / Gemini / Ollama) over plain HTTP,
+# so there is no SDK to install. Just set a key in .env (see .env.example) to switch it on.
