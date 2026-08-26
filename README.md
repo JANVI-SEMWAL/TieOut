@@ -1,6 +1,8 @@
-# ReconAgent — Multi-Source Settlement Reconciliation
+# TieOut — Multi-Source Settlement Reconciliation
 
 **Razorpay AI Buildathon 2026 · Track 04: AI Finance Controller**
+
+> *"Tie out"* is what accountants say when two sets of records match perfectly. That's the job.
 
 An agent that closes the reconciliation loop for a merchant — tying together their
 **internal orders**, their **payment-gateway settlements** (Razorpay-style), and their
@@ -125,7 +127,7 @@ the residual** it can't resolve, which keeps calls few and every decision review
 ## What each file does
 
 ```
-recon-agent/
+tieout/
 ├── run_demo.sh            one-command end-to-end demo
 ├── requirements.txt       stdlib to run; anthropic optional
 ├── .env.example           optional LLM config
